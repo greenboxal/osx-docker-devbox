@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. ~/.docker-devbox/lib/config.sh
+
+echo -e 'HTTP/1.1 200 OK\r\n'
+
+cat $DEVBOX_HOME/config/cloud-init.yaml   \
+	| sed s/%DEVBOX_IP%/$DEVBOX_IP/g      \
+	| sed s/%DEVBOX_HOST%/$DEVBOX_HOST/g
+

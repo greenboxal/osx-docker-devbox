@@ -1,0 +1,46 @@
+#!/bin/bash
+
+. ${DEVBOX_HOME:-$PWD}/lib/config.sh
+. $DEVBOX_HOME/lib/rerun-as-root.sh
+
+LATEST=$(ls -r $DEVBOX_HOME/images/${CHANNEL}.*.vmlinuz | head -n 1 | sed -e "s,.*${CHANNEL}.,," -e "s,.coreos_.*,,")
+if [[ -z ${LATEST} ]]; then
+    echo "Error: couldn't find anything to load locally (${CHANNEL} channel)."
+    echo "       please run 'make images' first."
+    exit 1
+fi
+VERSION=${VERSION:-${LATEST}}
+
+if [ ! -f "$DEVBOX_HOME/disk/disk.img" ]; then
+	echo "Error: couldn't find local disk image."
+    echo "       please run 'make disk' first."
+	exit 1
+fi
+
+[[ -n "${SSHKEY}" ]] && SSHKEY="sshkey=\"${SSHKEY}\""
+
+PAYLOAD=${CHANNEL}.${VERSION}.coreos_production_pxe
+VMLINUZ=${PAYLOAD}.vmlinuz
+INITRD=${PAYLOAD}_image.cpio.gz
+
+UUID="-U ${UUID}"
+
+CMDLINE="earlyprintk=serial console=ttyS0 ${SSHKEY} coreos.autologin"
+CMDLINE="${CMDLINE} cloud-config-url=${CLOUD_CONFIG}"
+
+MEMORY=${MEMORY:-1024}
+MEM="-m ${MEMORY}M"
+CPUS=${CPUS:-1}
+SMP="-c ${CPUS} -A"
+NET="-s 2:0,virtio-net"
+PCI_DEV="-s 0:0,hostbridge -s 31,lpc"
+BLK_DEV="-s 4,virtio-blk,$DEVBOX_HOME/disk/disk.img"
+LPC_DEV="-l com1,stdio"
+EXTRA_ARGS=${EXTRA_ARGS}
+
+screen -S $SCREEN_SESSION -d -m -L xhyve $MEM $SMP $PCI_DEV $LPC_DEV $BLK_DEV $NET $IMG_HDD $UUID $EXTRA_ARGS -f kexec,$DEVBOX_HOME/images/$VMLINUZ,$DEVBOX_HOME/images/$INITRD,"$CMDLINE"
+
+wait
+
+echo "Up."
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. ~/.docker-devbox/lib/config
+
+mkdir -p disk
+
+if [ -f disk/disk.img ]; then
+	echo Disk image already exists...
+	exit 0
+fi
+
+dd if=/dev/zero of=$DEVBOX_HOME/disk/disk.img bs=1m count=${DISK_SIZE}
+

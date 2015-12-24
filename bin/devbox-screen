@@ -1,0 +1,7 @@
+#!/bin/bash
+
+. ${DEVBOX_HOME:-$PWD}/lib/config.sh
+. $DEVBOX_HOME/lib/rerun-as-root.sh
+
+sudo screen -r $SCREEN_SESSION
+

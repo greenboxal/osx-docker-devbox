@@ -1,0 +1,8 @@
+#!/bin/bash
+
+. ~/.docker-devbox/lib/config
+
+echo "export PATH=$DEVBOX_HOME/bin:\$PATH"
+echo "export DEVBOX_HOME=$DEVBOX_HOME"
+echo "export DOCKER_HOST=tcp://$DEVBOX_HOST:2375"
+

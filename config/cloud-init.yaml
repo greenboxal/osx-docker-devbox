@@ -1,0 +1,76 @@
+#cloud-config
+
+coreos:
+  units:
+    # Static IP
+    - name: eth0.network
+      command: start
+      content: |
+        [Match]
+        Name=eth0
+
+        [Network]
+        DHCP=none
+        Address=%DEVBOX_IP%/24
+        Gateway=192.168.64.1
+        DNS=8.8.8.8
+        DNS=8.8.4.4
+    # Persistent Disk
+    - name: var-localdata.mount
+      command: start
+      content: |
+        [Mount]
+        What=/dev/vda
+        Where=/var/localdata
+    # Extra Docker Options
+    - name: docker.service
+      drop-ins: 
+        - name: 10-options.conf
+          content: |
+            [Unit]
+            After=var-localdata.mount
+    
+            [Service]
+            Environment="DOCKER_OPTS=-g /var/localdata/docker"
+    # Docker TCP Socket
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+    # NFS RPC
+    - name: rpc-statd.service
+      command: start
+      enable: true
+    # /data via NFS
+    - name: data.mount
+      command: start
+      content: |
+        [Mount]
+        What=192.168.64.1:/data
+        Where=/data
+        Type=nfs
+    # /Users via NFS(1-1 mapping)
+    - name: Users.mount
+      command: start
+      content: |
+        [Mount]
+        What=192.168.64.1:/Users
+        Where=/Users
+        Type=nfs
+write-files:
+  # NFS Configuration
+  - path: /etc/conf.d/nfs
+    permissions: '0644'
+    content: |
+      OPTS_RPC_MOUNTD=""
+

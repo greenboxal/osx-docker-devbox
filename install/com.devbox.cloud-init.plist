@@ -1,0 +1,20 @@
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.devbox.cloud-init</string>
+  <key>ProgramArguments</key>
+  <array>
+	<string>/bin/bash</string>
+	<string>-c</string>
+	<string>~/.docker-devbox/scripts/cloud-config</string>
+  </array>
+  <key>inetdCompatibility</key><dict><key>Wait</key><false/></dict>
+  <key>Sockets</key>
+  <dict>
+    <key>Listeners</key>
+    <dict>
+      <key>SockServiceName</key><string>6767</string>
+    </dict>
+  </dict>
+</dict>
+</plist>
+

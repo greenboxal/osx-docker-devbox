@@ -1,0 +1,6 @@
+#!/bin/bash
+
+. ~/.docker-devbox/lib/config
+
+echo "$DEVBOX_IP $DEVBOX_HOST"
+
